@@ -56,6 +56,17 @@ static inline vec3 vec3_sum(const vec3 *a, const vec3 *b)
     return result;
 }
 
+static inline vec3 vec3_subtraction(const vec3 *a, const vec3 *b)
+{
+    //vec3 result = vec3new(a->e[0]+b->e[0], a->e[1]+b->e[1], a->e[2]+b->e[2]);
+    vec3 result = vec3_new(
+        vec3_x(a)-vec3_x(b),
+        vec3_y(a)-vec3_y(b),
+        vec3_z(a)-vec3_z(b)
+    );
+    return result;
+}
+
 static inline vec3 vec3_scale(const vec3 *a, double b)
 {
     vec3 result = vec3_new(
