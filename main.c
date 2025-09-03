@@ -1,4 +1,3 @@
-
 #include "vec3.h"
 #include "color.h"
 #include "ray.h"
@@ -6,16 +5,41 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
-color ray_color(const ray *r)
-{
-    return vec3_new(0,0,0);
+bool hit_sphere(const point3 *center, double radius, const ray *r){
+    vec3 oc = vec3_subtraction(center, &r->origin);
+    double a = vec3_dot(&r->direction, &r->direction);
+    double b = -2.0 * vec3_dot(&r->direction, &oc);
+    double c = vec3_dot(&oc, &oc) - radius * radius;
+    double discriminant = b*b - 4*a*c;
+    return ( discriminant >= 0 );
 }
 
-int main()
-{
-    double aspect_ratio = 16/9;
-    int image_width = 400;
+color ray_color(const ray *r){
+
+    point3 center = vec3_new(0,0,-1);
+    if( hit_sphere(&center, (double) 0.5, r) )
+    {
+        color result = vec3_new( 1, 0, 1 );
+        return result;
+    }
+
+    vec3 unit_direction = vec3_unit_vector(&r->direction);
+    double a = 0.5 * (vec3_y(&unit_direction) + 1.0);
+    vec3 tempVector1 = vec3_new(1.0, 1.0, 1.0);
+    vec3 tempVector2 = vec3_new(0.5, 0.7, 1.0);
+    vec3 tempResult1 = vec3_scale( &tempVector1, (1.0-a) );
+    vec3 tempResult2 = vec3_scale( &tempVector2, a );
+
+    color result = vec3_sum(&tempResult1, &tempResult2);
+    return result;
+}
+
+int main(){
+
+    double aspect_ratio = 16.0/9.0;
+    int image_width = 800;
 
     // calcular a altura do imagem e ter certeza que é pelo menos 1
     int image_height = (int) (image_width/aspect_ratio);
@@ -36,8 +60,8 @@ int main()
     //vec3 *vuP = &viewport_u;
     
     //calcular o delta u e o delta v
-    vec3 pixel_delta_u =  vec3_div(&viewport_u, viewport_width);//viewport_u / viewport_width;
-    vec3 pixel_delta_v = vec3_div(&viewport_v, viewport_height);// viewport_v / vp_height
+    vec3 pixel_delta_u =  vec3_div(&viewport_u, image_width);//viewport_u / image_width;
+    vec3 pixel_delta_v = vec3_div(&viewport_v, image_height);// viewport_v / image_height;
 
     // calcular a posicao do pixel superior esquerdo (0,0)
 
@@ -63,10 +87,8 @@ int main()
 
     // render
     printf("P3\n%i %i\n255\n", image_width, image_height);
-    for(int j = 0; j<image_height; j++)
-    {
-        for(int i = 0; i<image_width; i++)
-        {
+    for(int j = 0; j<image_height; j++){
+        for(int i = 0; i<image_width; i++){
             fprintf(stderr, "\r Scanlines remaining: %i", (image_height-j));
             fflush(stderr);
             
@@ -83,16 +105,6 @@ int main()
         }
     }
     fprintf(stderr, "\rPRONTO!                              \n");
-
-
-
-
-
-    
-
-    
-    
-
 
 
     return 0;       
